@@ -1,4 +1,3 @@
-import LoginForm from '@/components/LoginForm'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { AuthProvider } from '../contexts/AuthContext'
 
@@ -8,13 +7,11 @@ export default function LoginPage() {
        <div className="min-h-screen flex items-center justify-center bg-[#1E2761]">
       <Card className="w-full max-w-md bg-white">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center text-[#1E2761]">Login</CardTitle>
-          <CardDescription className="text-center">
-            Entre com suas credenciais para acessar o sistema
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold text-center text-[#1E2761]">Dashboard</CardTitle>
+         
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          
         </CardContent>
       </Card>
     </div>

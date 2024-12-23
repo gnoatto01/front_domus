@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import ForgotPasswordForm from '@/components/esqueceuSenhaForm'
+import ForgotPasswordForm from '@/components/EsqueceuSenhaForm'
+import { AuthProvider } from "../contexts/AuthContext"
 
 export default function ForgotPasswordPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#1E2761]">
+    <AuthProvider>
+      <div className="min-h-screen flex items-center justify-center bg-[#1E2761]">
       <Card className="w-full max-w-md bg-white">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center text-[#1E2761]">Recuperar Senha</CardTitle>
@@ -16,6 +18,8 @@ export default function ForgotPasswordPage() {
         </CardContent>
       </Card>
     </div>
+    </AuthProvider>
+    
   )
 }
 

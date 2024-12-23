@@ -6,26 +6,34 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { useAuth } from '@/app/contexts/AuthContext'
+import { useForm } from 'react-hook-form'
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
+  const { register, handleSubmit } = useForm<Login.EntidadeLogin>();
+  const { signIn } = useAuth();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    // Aqui você pode adicionar a lógica de autenticação
-    console.log('Form submitted')
+  async function handleSignIn(dados: Login.EntidadeLogin){
+    try {
+      await signIn(dados);
+     
+  } catch (error) {
+     console.error(error); 
+  }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-[#1E2761]">Email</Label>
+        <Label htmlFor="email" className="text-[#1E2761]">Usuário</Label>
         <Input 
-          id="email" 
-          type="email" 
-          placeholder="seu@email.com" 
+          id="usuario" 
+          type="text" 
+          placeholder="Usuário" 
           required 
           className="border-[#7CC6FE] focus:ring-[#7CC6FE]"
+          {...register('usuario',{required:true}) }
         />
       </div>
       <div className="space-y-2">
@@ -37,6 +45,7 @@ export default function LoginForm() {
             placeholder="••••••••"
             required
             className="border-[#7CC6FE] focus:ring-[#7CC6FE]"
+            {...register('senha',{required:true}) }
           />
           <Button
             type="button"
