@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import ForgotPasswordForm from '@/components/EsqueceuSenhaForm'
+import ForgotPasswordForm from '@/components/ForgotPasswordForm'
 import { AuthProvider } from "../contexts/AuthContext"
 
 export default function ForgotPasswordPage() {

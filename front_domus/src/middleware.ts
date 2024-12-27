@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
+import { destroyCookie } from "nookies";
+
+
 
 export async function middleware(req: NextRequest) {
     const accessToken = req.cookies.get('attossoluctions.token')?.value;
-    console.log("middleware funcionando");
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
     if (!accessToken) {
         console.log('No token found')
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    try { 
+    try {
 
-        const response = await axios.get("http://localhost:8080/api/verificar-token", {
+        const response = await axios.get(`${baseUrl}/verify-token`, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -20,7 +23,9 @@ export async function middleware(req: NextRequest) {
 
         if (response.data) {
             return NextResponse.next();
+
         } else {
+            destroyCookie(null, 'attossoluctions.token');
             return NextResponse.redirect(new URL('/login', req.url));
         }
     } catch (error) {
@@ -28,8 +33,12 @@ export async function middleware(req: NextRequest) {
     }
 }
 
+// export const config = {
+//     matcher: [
+//         '/app/:path*',
+//     ]
+// }
+
 export const config = {
-    matcher: [
-        'src/app/:path*',
-    ]
-}
+    matcher: ['/dashboard'], // Baseado no prefixo de rotas acessíveis no navegador. Colocar todas as rotas que precisam ser encapsuladas. 
+};

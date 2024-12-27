@@ -11,29 +11,29 @@ import { useForm } from 'react-hook-form'
 
 export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
-  const { register, handleSubmit } = useForm<Login.EntidadeLogin>();
+  const { register, handleSubmit } = useForm<Login.LoginEntity>();
   const { signIn } = useAuth();
 
-  async function handleSignIn(dados: Login.EntidadeLogin){
+  async function handleSignIn(data: Login.LoginEntity) {
     try {
-      await signIn(dados);
-     
-  } catch (error) {
-     console.error(error); 
-  }
+      await signIn(data);
+
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
     <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email" className="text-[#1E2761]">Usuário</Label>
-        <Input 
-          id="usuario" 
-          type="text" 
-          placeholder="Usuário" 
-          required 
+        <Input
+          id="username"
+          type="text"
+          placeholder="Usuário"
+          required
           className="border-[#7CC6FE] focus:ring-[#7CC6FE]"
-          {...register('usuario',{required:true}) }
+          {...register('username', { required: true })}
         />
       </div>
       <div className="space-y-2">
@@ -45,7 +45,7 @@ export default function LoginForm() {
             placeholder="••••••••"
             required
             className="border-[#7CC6FE] focus:ring-[#7CC6FE]"
-            {...register('senha',{required:true}) }
+            {...register('password', { required: true })}
           />
           <Button
             type="button"
@@ -70,8 +70,8 @@ export default function LoginForm() {
           Esqueceu sua senha?
         </Link>
       </div>
-      <Button 
-        type="submit" 
+      <Button
+        type="submit"
         className="w-full bg-[#1E2761] hover:bg-[#7CC6FE] text-white transition-colors"
       >
         Entrar

@@ -12,7 +12,7 @@ export default function ForgotPasswordForm() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // Aqui você pode adicionar a lógica para enviar o e-mail de recuperação
+    
     console.log('Recuperação de senha solicitada para:', email)
     setIsSubmitted(true)
   }

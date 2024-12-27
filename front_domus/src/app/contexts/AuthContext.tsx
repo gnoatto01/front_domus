@@ -1,14 +1,16 @@
 'use client'
 import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'; 
+import { useRouter } from 'next/navigation';
 import nookies, { destroyCookie, setCookie } from 'nookies';
+import { jwtDecode } from 'jwt-decode';
+
 
 
 
 interface AuthContextData {
     isAuthenticated: boolean;
-    signIn: (dados: Login.EntidadeLogin) => Promise<void>;
+    signIn: (dados: Login.LoginEntity) => Promise<void>;
 }
 
 interface AuthProviderProps {
@@ -21,6 +23,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
 
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
+
     useEffect(() => {
         const token = nookies.get(null, 'attossoluctions.token');
         if (token) {
@@ -30,32 +34,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
     }, []);
 
-    // Função de login
-    async function signIn({ usuario, senha }: Login.EntidadeLogin) {
+    async function signIn({ username, password }: Login.LoginEntity) {
         try {
-            
-
-            const resposta = await axios.post('http://localhost:8080/api/logar', { usuario, senha });
-
-            const expiraEm = resposta.data.expiraEm; 
 
 
-            setIsAuthenticated(true);
+            const response = await axios.post(`${baseUrl}/login`, { username, password });
 
-            // Definir o cookie com o token
-            setCookie(undefined, 'attossoluctions.token', resposta.data.tokenDeAcesso, {
-                maxAge: expiraEm, 
-                path: '/',
-            });
+            //decodifiquei o token
+            const decoded = jwtDecode(response.data.accessToken);
 
-            // Redirecionar para a página de dashboard
-            router.push('/dashboard');
+            //verifiquei se existe data de expiracao
+            if (decoded.exp) {
+                //setei a data de expiracao
+                const expiresIn = decoded.exp;
+                setIsAuthenticated(true);
+
+                setCookie(undefined, 'attossoluctions.token', response.data.accessToken, {
+                    maxAge: expiresIn,
+                    path: '/',
+                });
+
+
+                // Redirecionar para a página de dashboard
+                router.push('/dashboard');
+            } else {
+                throw new Error('Invalid token, exp not present.');
+            }
 
         } catch (error) {
             setIsAuthenticated(false);
             destroyCookie(null, 'attossoluctions.token'); // Remover cookie inválido
             router.push('/login'); // Redirecionar para login
-            throw new Error('Falha na autenticação.');
+            throw new Error('Falha na autenticação.' + error);
         }
     }
 

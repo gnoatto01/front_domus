@@ -1,6 +1,6 @@
 declare namespace Login {
-    type EntidadeLogin = {
-        usuario:string; 
-        senha:string; 
+    type LoginEntity = {
+        username:string; 
+        password:string; 
     }
 }
