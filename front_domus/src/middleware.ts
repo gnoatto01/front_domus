@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { destroyCookie } from "nookies";
 
-
+//FIXME: verificar o porque o token "recria" quando atualiza a tela
 
 export async function middleware(req: NextRequest) {
     const accessToken = req.cookies.get('attossoluctions.token')?.value;
