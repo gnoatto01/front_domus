@@ -88,7 +88,7 @@ export const buscarComParametros = async <T>(
             },
             params, // Passa o objeto params
         });
-        console.log(resposta);
+
         return resposta.data;
 
     } catch (error) {

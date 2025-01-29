@@ -55,8 +55,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 });
 
 
-                // Redirecionar para a página de dashboard
-                router.push('/dashboard');
+                // Redirecionar para a página home
+                router.push('/home');
             } else {
                 throw new Error('Invalid token, exp not present.');
             }

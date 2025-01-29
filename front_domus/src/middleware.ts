@@ -40,5 +40,5 @@ export async function middleware(req: NextRequest) {
 // }
 
 export const config = {
-    matcher: ['/dashboard'], // Baseado no prefixo de rotas acessíveis no navegador. Colocar todas as rotas que precisam ser encapsuladas. 
+    matcher: ['/home'], // Baseado no prefixo de rotas acessíveis no navegador. Colocar todas as rotas que precisam ser encapsuladas. 
 };
