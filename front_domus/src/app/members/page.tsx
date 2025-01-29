@@ -12,7 +12,7 @@ import AddMemberForm from "@/components/AddMember";
 import MemberList from "@/components/MemberList";
 
 function MembersPage() {
-    const [showAddForm, setShowAddForm] = useState(false)
+    const [open, setOpen] = useState(false)
     const [searchTerm, setSearchTerm] = useState("")
     return (
         <AuthProvider>
@@ -35,13 +35,13 @@ function MembersPage() {
                                     <Search className="h-4 w-4" />
                                 </Button>
                             </div>
-                            <Button onClick={() => setShowAddForm(true)} className="bg-[#4A7C59] hover:bg-[#3B5A43] text-white">
+                            <Button onClick={() => setOpen(true)} className="bg-[#4A7C59] hover:bg-[#3B5A43] text-white">
                                 <PlusCircle className="mr-2 h-4 w-4" />
-                                Adicionar Membro
+                                Adicionar pessoa
                             </Button>
 
                         </div>
-                        {showAddForm && <AddMemberForm onClose={() => setShowAddForm(false)} />}
+                        {<AddMemberForm open={open} setOpen={setOpen} />}
                         <MemberList />
                     </main>
                 </div>

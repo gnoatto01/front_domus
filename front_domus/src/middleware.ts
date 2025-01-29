@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 import { destroyCookie } from "nookies";
 
-//FIXME: verificar o porque o token "recria" quando atualiza a tela
 
 export async function middleware(req: NextRequest) {
     const accessToken = req.cookies.get('attossoluctions.token')?.value;
@@ -40,5 +39,5 @@ export async function middleware(req: NextRequest) {
 // }
 
 export const config = {
-    matcher: ['/home'], // Baseado no prefixo de rotas acessíveis no navegador. Colocar todas as rotas que precisam ser encapsuladas. 
+    matcher: ['/home'],
 };
