@@ -14,16 +14,22 @@ export default function Header() {
         router.push("/login");
     }
 
+    const HandleHome = () => {
+        router.push("/home");
+    }
+
+    //FIXME: Verificar uma maneira de deixar o top menu bonito
     return (
         <header className="bg-[#4A7C59] text-[#FFFFFF] p-4 shadow-md">
             <div className="container mx-auto flex justify-between items-center">
-                <h1 className="text-2xl font-bold tracking-wide">DOMUS</h1>
+                {/* <h1 className="text-2xl font-bold tracking-wide"></h1> */}
                 <nav>
                     <ul className="flex space-x-4">
                         <li>
                             <Button
                                 variant="link"
                                 className="text-[#FFFFFF] hover:bg-[#376B48] transition-colors"
+                                onClick={HandleHome}
                             >
                                 Início
                             </Button>
@@ -83,7 +89,7 @@ export default function Header() {
                     </ul>
                 </nav>
             </div>
-        </header>
+        </header >
     );
 }
 
