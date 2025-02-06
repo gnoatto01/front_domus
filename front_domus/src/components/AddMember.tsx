@@ -5,17 +5,20 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { criarRegistro } from "@/utils/AxiosService";
-import { IdCardIcon, MailIcon, PhoneIcon, UserIcon } from "lucide-react";
+import { buscarComParametros, buscarTodos, criarRegistro } from "@/utils/AxiosService";
+import { Building, Building2Icon, FilePenIcon, HomeIcon, IdCardIcon, MailIcon, MapIcon, MapPinHouse, MapPinIcon, MapPinned, PhoneIcon, Search, SubtitlesIcon, UserIcon } from "lucide-react";
+import { DialogDescription } from "@radix-ui/react-dialog";
 
 export default function AddMemberForm({ open, setOpen }: OpenDialog) {
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<any>({});
 
     const [step, setStep] = useState(1);
     const [personType, setPersonType] = useState("");
+    const [isActive, setIsActive] = useState("");
     const [gender, setGender] = useState("");
     const [maritalStatus, setMaritalStatus] = useState("");
-    const [formData, setFormData] = useState<Person.naturalPersonEntity>();
+    const [formData, setFormData] = useState<Person.PersonEntity>();
+
 
     // Função para salvar os dados conforme o usuário avança nas etapas
     const saveStepData = (data: any) => {
@@ -27,10 +30,10 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
     const prevStep = () => setStep((prev) => prev - 1);
 
 
-    const handleSave: SubmitHandler<Person.naturalPersonEntity> = async (data) => {
+    const handleSave: SubmitHandler<Person.PersonEntity> = async (data) => {
         try {
             console.log(formData);
-            await criarRegistro<Person.naturalPersonEntity>({ data: data }, "new-person");
+            await criarRegistro<Person.PersonEntity>({ data: data }, "new-person");
             setOpen(false);
 
         } catch (error) {
@@ -38,8 +41,34 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
         }
     };
 
+    const handleCep = async () => {
+
+        const cepInput = document.getElementById('cep') as HTMLInputElement;
+        const cep = cepInput?.value;
+
+        try {
+            const response = await buscarComParametros<Address.viaCepResponse>("get-cep", { cep });
+
+            //seta os valores
+            setValue("street", response.logradouro || "", { shouldValidate: true });
+            setValue("district", response.bairro || "", { shouldValidate: true });
+            setValue("city", response.localidade || "", { shouldValidate: true });
+            setValue("state", response.estado || "", { shouldValidate: true });
+
+            console.log(response);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+
+
+    //FIXME: colocar description nos dialogs, para sumir os warnings 
+
+
     return (
         <Dialog open={open} onOpenChange={setOpen}>
+
             <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>Cadastro de nova pessoa</DialogTitle>
@@ -54,21 +83,23 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                                     <div className="relative">
                                         <Input
                                             id="name"
-                                            {...register("name", { required: true })}
+                                            {...register("name", personType === 'F' ? { required: true } : { required: false })}
                                             autoComplete="off"
                                             className="pl-10"
+                                            disabled={personType === 'J'}
                                         />
                                         <UserIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
                                     </div>
 
-                                    {errors.name && <span className="text-red-600">O nome é obrigatório</span>}
+                                    {errors.name && personType === 'F' && <span className="text-red-600">O nome é obrigatório</span>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="lastname">Sobrenome</Label>
-                                    <div className="relative">
-                                        <Input id="lastname" {...register("lastName", { required: true })} autoComplete="off" className="pl-10" />
-                                    </div>
-                                    {errors.lastName && <span className="text-red-600">O sobrenome é obrigatório</span>}
+
+                                    <Input id="lastname" {...register("lastName", personType === 'F' ? { required: true } : { required: false })} autoComplete="off"
+                                        disabled={personType === 'J'} />
+
+                                    {errors.lastName && personType === 'F' && <span className="text-red-600">O sobrenome é obrigatório</span>}
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="phone">Telefone</Label>
@@ -91,6 +122,22 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                                     </div>
 
                                 </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="isActive">Status</Label>
+                                    <Select onValueChange={(value) => {
+                                        setIsActive(value),
+                                            setValue("isActive", value)
+                                    }}>
+                                        <SelectTrigger id="isActive">
+                                            <SelectValue placeholder="Selecione..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+
+                                            <SelectItem value="S">Ativo</SelectItem>
+                                            <SelectItem value="N">Inativo</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
                                 <div className="space-y-2">
                                     <Label htmlFor="tipo">Tipo da pessoa</Label>
@@ -102,6 +149,7 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                                             <SelectValue placeholder="Selecione..." />
                                         </SelectTrigger>
                                         <SelectContent>
+
                                             <SelectItem value="F">Física</SelectItem>
                                             <SelectItem value="J">Jurídica</SelectItem>
                                         </SelectContent>
@@ -182,15 +230,57 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                             ) : (
                                 <div className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="cnpj">CNPJ</Label>
-                                        {/* <Input id="cnpj" {...register("cnpj", { required: true })} autoComplete="off" /> */}
-                                        {/* {errors.cnpj && <span className="text-red-600">O CNPJ é obrigatório</span>} */}
+                                        <Label htmlFor="companyName">Razão Social</Label>
+                                        <div className="relative">
+                                            <Input id="companyName" {...register("companyName", { required: true })} autoComplete="off" className="pl-10" />
+                                            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                        </div>
+
+                                        {errors.companyName && <span className="text-red-600">A Razão Social é obrigatória</span>}
                                     </div>
+
                                     <div className="space-y-2">
-                                        <Label htmlFor="razaoSocial">Razão Social</Label>
-                                        {/* <Input id="razaoSocial" {...register("razaoSocial", { required: true })} autoComplete="off" /> */}
-                                        {/* {errors.razaoSocial && <span className="text-red-600">A Razão Social é obrigatória</span>} */}
+                                        <Label htmlFor="tradeName">Nome fantasia</Label>
+                                        <div className="relative">
+                                            <Input id="tradeName" {...register("tradeName", { required: false })} autoComplete="off" className="pl-10" />
+                                            <SubtitlesIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                        </div>
+
                                     </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="cnpj">CNPJ</Label>
+                                        <div className="relative">
+                                            <Input id="cnpj" {...register("cnpj", { required: true })} autoComplete="off" className="pl-10" />
+                                            <IdCardIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                        </div>
+
+                                        {errors.cnpj && <span className="text-red-600">O CNPJ é obrigatório</span>}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="stateRegistration">Inscrição estadual</Label>
+                                        <div className="relative">
+                                            <Input id="stateRegistration" {...register("stateRegistration", { required: false })} autoComplete="off" className="pl-10" />
+                                            <FilePenIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                        </div>
+
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="municipalRegistrarion">Inscrição municipal</Label>
+                                        <div className="relative">
+                                            <Input id="municipalRegistrarion" {...register("municipalRegistrarion", { required: false })} autoComplete="off" className="pl-10" />
+                                            <FilePenIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                        </div>
+
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="openingDate">Data de abertura</Label>
+                                        <Input id="openingDate" type="date" {...register("openingDate", { required: false })} />
+                                    </div>
+
                                 </div>
                             )}
                             <DialogFooter className="flex justify-between">
@@ -209,7 +299,12 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="name">Rua</Label>
-                                    <Input id="street" {...register("street", { required: true })} autoComplete="off" />
+                                    <div className="relative">
+
+                                        <Input id="street" {...register("street", { required: true })} autoComplete="off" className="pl-10" />
+                                        <HomeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                    </div>
+
                                     {errors.street && <span className="text-red-600">A rua é obrigratória</span>}
                                 </div>
                                 <div className="space-y-2">
@@ -217,22 +312,60 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                                     <Input id="district" {...register("district", { required: true })} autoComplete="off" />
                                     {errors.district && <span className="text-red-600">O bairro é obrigatório</span>}
                                 </div>
+
                                 <div className="space-y-2">
                                     <Label htmlFor="city">Cidade</Label>
-                                    <Input id="city" {...register("city")} autoComplete="off" />
+                                    <div className="relative">
+                                        <Input id="city" {...register("city", { required: true })} autoComplete="off" className="pl-10" />
+                                        <Building2Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+
+                                    </div>
+                                    {errors.city && <span className="text-red-600">A cidade é obrigatória</span>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="number">Número</Label>
+                                    <Input id="number" {...register("number", { required: true })} autoComplete="off" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="state">Estado</Label>
-                                    <Input id="state" {...register("state", { required: true })} autoComplete="off" />
+                                    <div className="relative">
+                                        <Input id="state" {...register("state", { required: true })} autoComplete="off" className="pl-10" />
+                                        <MapIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                    </div>
+
                                     {errors.state && <span className="text-red-600">O estado é obrigatório</span>}
                                 </div>
-                                <div className="space-y-2 col-span-2">
+                                <div className="space-y-2">
                                     <Label htmlFor="cep">Cep</Label>
-                                    <Input id="cep" type="text" {...register("cep")} autoComplete="off" />
+                                    <div className="relative">
+
+                                        <Input
+                                            id="cep"
+                                            type="text"
+                                            {...register("cep")}
+                                            autoComplete="off"
+                                            className="pl-10 pr-14"
+                                            maxLength={8}
+                                        />
+
+                                        <MapPinIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+
+                                        <button
+                                            type="button"
+                                            onClick={handleCep}
+                                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-black"
+                                        >
+                                            <Search size={18} />
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2 col-span-2">
                                     <Label htmlFor="complement">Complemento</Label>
-                                    <Input id="complement" type="text" {...register("complement")} autoComplete="off" />
+                                    <div className="relative">
+                                        <Input id="complement" type="text" {...register("complement")} autoComplete="off" className="pl-10" />
+                                        <FilePenIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={14} />
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -262,6 +395,6 @@ export default function AddMemberForm({ open, setOpen }: OpenDialog) {
                     )}
                 </form>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }

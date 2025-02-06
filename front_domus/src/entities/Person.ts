@@ -1,12 +1,13 @@
 declare namespace Person {
 
-    type naturalPersonEntity = {
+    type PersonEntity = {
         personId: number
         name: string
         lastName: string
         phone: string
         cellPhone: string
         email: string
+        isActive: string
         personType: string
         birthDate: Date
         cpf: string
@@ -24,6 +25,12 @@ declare namespace Person {
         occupation: string
         observations: string
         lastUpdate: Date
+        companyName: string
+        tradeName: string
+        cnpj: string
+        stateRegistration: string
+        municipalRegistrarion: string
+        openingDate: Date
         street: string
         district: string
         city: string
@@ -31,4 +38,6 @@ declare namespace Person {
         cep: string
         complement: string
     }
+
+
 }

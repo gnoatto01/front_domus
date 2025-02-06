@@ -1,73 +1,78 @@
-import { useEffect, useState } from "react"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Pencil, Trash2 } from "lucide-react"
-import { buscarTodos } from "@/utils/AxiosService"
+import { useEffect, useState } from "react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2 } from "lucide-react";
+import { buscarTodos } from "@/utils/AxiosService";
+
 
 
 export default function MemberList() {
-
-    const [data, setData] = useState<Person.personEntity[] | null>(null);
-
-    // const filteredMembers = members.filter(
-    //     (member) =>
-    //         member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //         member.email.toLowerCase().includes(searchTerm.toLowerCase()),
-    // )
+    const [data, setData] = useState<Person.PersonEntity[] | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         GetPersons();
     }, []);
 
-
     async function GetPersons() {
         try {
-
-            const response = await buscarTodos<Person.personEntity[]>("person");
-
-            if (response) {
-                setData(response);
-            }
-
+            const response = await buscarTodos<Person.PersonEntity[]>("person");
+            setData(response ?? []);
         } catch (error) {
             console.error(error);
+        } finally {
+            setLoading(false);
         }
     }
 
     const handleDelete = (id: number) => {
-
-    }
+        console.log("Deletando ID:", id);
+    };
 
     return (
-        <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Sobrenome</TableHead>
-                    <TableHead>Celular</TableHead>
-                    <TableHead>E-mail</TableHead>
-                    <TableHead>Ações</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {data?.map((person) => (
-                    <TableRow key={person.personId}>
-                        <TableCell>{person.name}</TableCell>
-                        <TableCell>{person.lastName}</TableCell>
-                        <TableCell>{person.cellPhone}</TableCell>
-                        <TableCell>{person.email}</TableCell>
-                        <TableCell>
-                            <Button variant="ghost" size="icon" className="mr-2">
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDelete(person.personId)}>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </TableCell>
-                    </TableRow>
-                ))}
-            </TableBody>
-        </Table>
-    )
-}
+        <div className="border rounded-lg shadow-md p-4 bg-white">
 
+
+            {loading ? (
+                <p className="text-center text-gray-500 py-4">Carregando...</p>
+            ) : data && data.length > 0 ? (
+                <Table>
+                    <TableHeader className="bg-muted">
+                        <TableRow>
+                            <TableHead className="text-center px-4 py-2">Nome</TableHead>
+                            <TableHead className="text-center px-4 py-2">Sobrenome</TableHead>
+                            <TableHead className="text-center px-4 py-2">Celular</TableHead>
+                            <TableHead className="text-center px-4 py-2">E-mail</TableHead>
+                            <TableHead className="text-center px-4 py-2">Ações</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {data.map((person) => (
+                            <TableRow key={person.personId} className="hover:bg-accent">
+                                <TableCell className="text-center px-4 py-2">{person.name}</TableCell>
+                                <TableCell className="text-center px-4 py-2">{person.lastName}</TableCell>
+                                <TableCell className="text-center px-4 py-2">{person.cellPhone}</TableCell>
+                                <TableCell className="text-center px-4 py-2">{person.email}</TableCell>
+                                <TableCell className="text-center px-4 py-2 flex justify-center space-x-2">
+                                    <Button variant="ghost" size="icon" className="rounded-lg hover:text-blue-500">
+                                        <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-lg hover:text-red-500"
+                                        onClick={() => handleDelete(person.personId)}
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            ) : (
+                <p className="text-center text-gray-500 py-4">Nenhum membro encontrado.</p>
+            )}
+        </div>
+    );
+}
